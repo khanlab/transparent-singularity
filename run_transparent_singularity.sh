@@ -11,6 +11,14 @@
 container=$1
 container_pull="curl -v -s -S -X GET https://swift.rc.nectar.org.au:8888/v1/AUTH_d6165cc7b52841659ce8644df1884d5e/singularityImages/$container -O"
 
+if [ "$#" -gt 1 ]
+then
+	echo "warning: overriding commands with file: $2"
+	override_commands_txt=$2
+fi
+
+
+
 # define mount points for this system
 echo 'warning: it is important to set your system specific mount points in your .bashrc!: e.g. export SINGULARITY_BINDPATH="/opt,/data"'
 
@@ -33,8 +41,13 @@ if  [[  ${#qq} -lt 1 ]]; then
 fi
 
 
+if [ -e "$override_commands_txt" ]
+then
+cat $override_commands_txt > commands.txt
+else
 echo "checking which executables exist inside container"
 singularity exec --pwd $deploy_path $container ./ts_binaryFinder.sh
+fi
 
 echo "create singularity executable for each regular executable in commands.txt"
 # $@ parses command line options.
